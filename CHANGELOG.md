@@ -1,6 +1,7 @@
 ## Premailer CHANGELOG
 
 ### Unreleased
+* Replace `Addressable.uri` with `URI::DEFAULT_PARSER`
 
 ### Version 1.21.0
 * Use rule_set_exceptions in nokogiri_fast and nokogumbo adapters

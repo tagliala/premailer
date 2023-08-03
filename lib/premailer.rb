@@ -2,7 +2,7 @@ require 'yaml'
 require 'open-uri'
 require 'digest/sha2'
 require 'cgi'
-require 'addressable/uri'
+require 'uri'
 require 'css_parser'
 
 require 'premailer/adapter'

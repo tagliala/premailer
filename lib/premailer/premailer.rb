@@ -227,9 +227,9 @@ class Premailer
     @unmergable_rules = nil
 
     if @options[:base_url]
-      @base_url = Addressable::URI.parse(@options.delete(:base_url))
+      @base_url = URI::DEFAULT_PARSER.parse(@options.delete(:base_url))
     elsif not @is_local_file
-      @base_url = Addressable::URI.parse(@html_file)
+      @base_url = URI::DEFAULT_PARSER.parse(@html_file)
     end
 
     @css_parser = CssParser::Parser.new({
@@ -376,7 +376,7 @@ public
       next if href[0,1] =~ /[\#\{\[\<\%]/ # don't bother with anchors or special-looking links
 
       begin
-        href = Addressable::URI.parse(href)
+        href = URI::DEFAULT_PARSER.parse(href)
 
         if current_host and href.host != nil and href.host != current_host
           $stderr.puts "Skipping append_query_string for: #{href.to_s} because host is no good" if @options[:verbose]
@@ -396,7 +396,7 @@ public
         end
 
         el['href'] = href.to_s
-      rescue Addressable::URI::InvalidURIError => e
+      rescue URI::InvalidURIError => e
         $stderr.puts "Skipping append_query_string for: #{href.to_s} (#{e.message})" if @options[:verbose]
         next
       end
@@ -422,7 +422,7 @@ public
   #
   # Returns a document.
   def convert_inline_links(doc, base_uri) # :nodoc:
-    base_uri = Addressable::URI.parse(base_uri) unless base_uri.kind_of?(Addressable::URI)
+    base_uri = URI::DEFAULT_PARSER.parse(base_uri) unless base_uri.kind_of?(URI)
 
     append_qs = @options[:link_query_string] || ''
     escape_attrs = @options[:escape_url_attributes]
@@ -441,7 +441,7 @@ public
 
         if tag.attributes[attribute].to_s =~ /^http/i
           begin
-            merged = Addressable::URI.parse(tag.attributes[attribute])
+            merged = URI::DEFAULT_PARSER.parse(tag.attributes[attribute])
           rescue; next; end
         else
           begin
@@ -449,13 +449,13 @@ public
           rescue
             begin
               next unless escape_attrs
-              merged = Premailer.resolve_link(Addressable::URI.escape(tag.attributes[attribute].to_s), base_uri)
+              merged = Premailer.resolve_link(URI::DEFAULT_PARSER.escape(tag.attributes[attribute].to_s), base_uri)
             rescue; end
           end
         end
 
         # make sure 'merged' is a URI
-        merged = Addressable::URI.parse(merged.to_s) unless merged.kind_of?(Addressable::URI)
+        merged = URI::DEFAULT_PARSER.parse(merged.to_s) unless merged.kind_of?(URI)
         tag[attribute] = merged.to_s
       end # end of each tag
     end # end of each attrs
@@ -478,12 +478,12 @@ public
     if path =~ /\A(?:(https?|ftp|file):)\/\//i
       resolved = path
       Premailer.canonicalize(resolved)
-    elsif base_path.kind_of?(Addressable::URI)
-      resolved = base_path.join(path)
+    elsif base_path.kind_of?(URI)
+      resolved = URI.join(base_path, path)
       Premailer.canonicalize(resolved)
     elsif base_path.kind_of?(String) and base_path =~ /\A(?:(?:https?|ftp|file):)\/\//i
-      resolved = Addressable::URI.parse(base_path)
-      resolved = resolved.join(path)
+      resolved = URI::DEFAULT_PARSER.parse(base_path)
+      resolved = URI.join(resolved, path)
       Premailer.canonicalize(resolved)
     else
       File.expand_path(path, File.dirname(base_path))
@@ -500,7 +500,7 @@ public
 
   # from http://www.ruby-forum.com/topic/140101
   def self.canonicalize(uri) # :nodoc:
-    u = uri.kind_of?(Addressable::URI) ? uri : Addressable::URI.parse(uri.to_s)
+    u = uri.kind_of?(URI) ? uri : URI::DEFAULT_PARSER.parse(uri.to_s)
     u.normalize!
     u.to_s
   end
