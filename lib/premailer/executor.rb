@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'optparse'
-require 'premailer'
+
+require_relative '../premailer'
 
 # defaults
 options = {

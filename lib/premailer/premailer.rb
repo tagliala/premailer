@@ -30,7 +30,7 @@
 # puts premailer.to_inline_css
 # ```
 #
-require 'premailer/version'
+require_relative 'version'
 
 class Premailer
   include HtmlToPlainText
